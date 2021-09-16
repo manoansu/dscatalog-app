@@ -7,12 +7,15 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import pt.amane.dscatalog.dtos.CategoryDTO;
 import pt.amane.dscatalog.entities.Category;
 import pt.amane.dscatalog.repositories.CategoryRepository;
+import pt.amane.dscatalog.services.exceptions.DataBaseIntegrityViolationException;
 import pt.amane.dscatalog.services.exceptions.ObjectNotFoundException;
 
 @Service
@@ -53,6 +56,17 @@ public class CategoryService {
 		} catch (EntityNotFoundException e) {
 			throw new ObjectNotFoundException("Id not found! Id: " + id + ", Type: " + CategoryDTO.class.getName());
 		}
+	}
+
+	public void delete(Long id) {
+		try {
+			repository.deleteById(id);
+		} catch (EmptyResultDataAccessException e) {
+			throw new ObjectNotFoundException("Id not found! Id: " + id);
+		}catch (DataIntegrityViolationException e) {
+			throw new DataBaseIntegrityViolationException("category cannot be deleted! has associated object..");
+		}
+		
 	}
 
 }
